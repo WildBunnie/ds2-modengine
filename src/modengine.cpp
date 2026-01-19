@@ -1,6 +1,6 @@
 #include "modengine.h"
 
-#include "MinHook.h"
+#include "MinHook/include/MinHook.h"
 
 #ifdef MODENGINE_DEBUG
 #include <stdio.h>

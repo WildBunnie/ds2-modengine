@@ -15,8 +15,8 @@ mkdir build\%ARCH%
 pushd build\%ARCH%
 %ASSEMBLER% /Fo dinput8.obj /c ../../src/dinput8_%ARCH%.asm
 cl ../../src/dllmain.cpp ../../src/modengine.cpp ../../src/dinput8.def dinput8.obj ^
-    ../../dependencies/MinHook_134_lib/lib/libMinHook.%VSCMD_ARG_TGT_ARCH%.lib ^
+    ../../dependencies/MinHook/lib/libMinHook.%VSCMD_ARG_TGT_ARCH%.lib ^
     /LD /MT ^
-    /I"../../dependencies/MinHook_134_lib/include" ^
+    /I"../../dependencies" ^
     /Fe:dinput8.dll
 popd
