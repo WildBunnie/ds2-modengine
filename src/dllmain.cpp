@@ -25,7 +25,7 @@ void load_original_dll()
 
     UINT len = GetSystemDirectoryW(buffer, MAX_PATH);
 
-    for (int i = 0; buffer[len] = dll_path[i]; i++, len++);
+    for (int i = 0; (buffer[len] = dll_path[i]); i++, len++);
 
     dinput8_library_handle = LoadLibraryW(buffer);
 
@@ -37,12 +37,18 @@ void load_original_dll()
     }
 }
 
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+DWORD WINAPI modengine_thread(LPVOID)
+{
+    modengine_run();
+    return 0;
+}
+
+BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID)
 {
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
             load_original_dll();
-            CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modengine_run, 0, 0, 0);
+            CreateThread(0, 0, modengine_thread, 0, 0, 0);
             break;
 
         case DLL_THREAD_ATTACH: break;

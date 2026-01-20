@@ -1,6 +1,6 @@
 #include "modengine.h"
 
-#include "MinHook/include/MinHook.h"
+#include "MinHook/MinHook.h"
 
 #ifdef MODENGINE_DEBUG
 #include <stdio.h>
@@ -15,7 +15,7 @@ ds2_grow_DLString_t ds2_grow_DLString = 0;
 uintptr_t ds2_base_address = 0;
 wchar_t user_defined_assets_dir[MAX_PATH] = {0};
 
-int patch_memory(void* address, void* patch, int size)
+int patch_memory(void* address, void* patch, size_t size)
 {
     DWORD old_protect = 0;
 
@@ -24,7 +24,7 @@ int patch_memory(void* address, void* patch, int size)
     uint8_t* src = (uint8_t*)patch;
     uint8_t* dst = (uint8_t*)address;
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         dst[i] = src[i];
     }
 
@@ -49,9 +49,9 @@ int wstring_starts_with(const wchar_t* a, const wchar_t* b)
     return 1;
 }
 
-int wstring_join_path(wchar_t* dest, wchar_t* part1, wchar_t* part2)
+size_t wstring_join_path(wchar_t* dest, wchar_t* part1, wchar_t* part2)
 {
-    int pos = 0;
+    size_t pos = 0;
 
     while (*part1 != '\0') {
         dest[pos++] = *part1++;
@@ -71,7 +71,8 @@ int wstring_join_path(wchar_t* dest, wchar_t* part1, wchar_t* part2)
 }
 
 #ifdef _M_IX86
-uintptr_t __fastcall ds2_detour_virtual_to_archive_path(uintptr_t p1, void* _edx, DLString* path)
+// hooking thiscalls in 32 bit: https://www.unknowncheats.me/forum/617803-post5.html
+uintptr_t __fastcall ds2_detour_virtual_to_archive_path(uintptr_t p1, void*, DLString* path)
 #elif defined(_M_X64)
 uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
 #endif
@@ -86,7 +87,7 @@ uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
 
         if (prefix_len != -1) {
             wchar_t new_path[MAX_PATH] = {0};
-            int new_path_len = wstring_join_path(
+            size_t new_path_len = wstring_join_path(
                 new_path,
                 user_defined_assets_dir,
                 path->string + prefix_len
@@ -98,7 +99,7 @@ uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
                     ds2_grow_DLString(path, (new_path_len + 1), path->length);
                 }
 
-                for (int i = 0; path->string[i] = new_path[i]; i++);
+                for (int i = 0; (path->string[i] = new_path[i]); i++);
                 path->length = new_path_len;
             }
         }
@@ -109,7 +110,7 @@ uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
 
 void force_offline()
 {
-    unsigned int forceOffline = GetPrivateProfileIntW(
+    UINT forceOffline = GetPrivateProfileIntW(
         L"online",
         L"forceOffline",
         1,
@@ -148,7 +149,7 @@ void force_offline()
 
 void patch_save_file()
 {
-    int useAlternativeSaveFile = GetPrivateProfileIntW(
+    UINT useAlternativeSaveFile = GetPrivateProfileIntW(
         L"savefile",
         L"useAlternativeSaveFile",
         1,
@@ -183,7 +184,7 @@ void patch_save_file()
 
 void setup_asset_overrides()
 {
-    int useModOverrideDirectory = GetPrivateProfileIntW(
+    UINT useModOverrideDirectory = GetPrivateProfileIntW(
         L"files",
         L"useModOverrideDirectory",
         0,
@@ -192,7 +193,7 @@ void setup_asset_overrides()
 
     if (useModOverrideDirectory != 1) return;
 
-    DWORD characters_read = GetPrivateProfileStringW(
+    GetPrivateProfileStringW(
         L"files",
         L"modOverrideDirectory",
         0,
@@ -210,7 +211,7 @@ void setup_asset_overrides()
 
 void load_extra_dlls()
 {
-    unsigned int useExtraDLLsDirectory = GetPrivateProfileIntW(
+    UINT useExtraDLLsDirectory = GetPrivateProfileIntW(
         L"files",
         L"useExtraDLLsDirectory",
         0,
@@ -220,7 +221,7 @@ void load_extra_dlls()
     if (useExtraDLLsDirectory != 1) return;
 
     wchar_t dlls_dir[MAX_PATH] = {0};
-    unsigned long characters_read = GetPrivateProfileStringW(
+    DWORD characters_read = GetPrivateProfileStringW(
         L"files",
         L"extraDllsDirectory",
         0,
@@ -261,7 +262,7 @@ void setup_qol_patches()
     uintptr_t no_press_start_offset = 0xFDB66;
 #endif
 
-    unsigned int skipIntro = GetPrivateProfileIntW(
+    UINT skipIntro = GetPrivateProfileIntW(
         L"qol",
         L"skipIntro",
         0,
@@ -274,7 +275,7 @@ void setup_qol_patches()
         patch_memory(address, &patch, 1);
     }
 
-    unsigned int skipPressStart = GetPrivateProfileIntW(
+    UINT skipPressStart = GetPrivateProfileIntW(
         L"qol",
         L"skipPressStart",
         0,
