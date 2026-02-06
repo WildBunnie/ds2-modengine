@@ -80,9 +80,9 @@ uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
     // ignore capacity above 7 to not have to deal with SSO bullshit
     if (path && path->length > 0 && path->string) {
         // NOTE: i have no idea which things i actually need to override
-        // overriding title:/ and gamedata:/ seems to be enough for now
+        // overriding gamedata:/ seems to be enough for now
         int prefix_len = -1;
-        if (wstring_starts_with(path->string, L"title:/")) prefix_len = 7;
+        // if (wstring_starts_with(path->string, L"title:/")) prefix_len = 7;
         if (wstring_starts_with(path->string, L"gamedata:/")) prefix_len = 10;
 
         if (prefix_len != -1) {
@@ -256,10 +256,10 @@ void setup_qol_patches()
 {
 #ifdef _M_IX86
     uintptr_t no_logos_offset = 0x1146E96;
-    uintptr_t no_press_start_offset = 0x1949B1;
+    // uintptr_t no_press_start_offset = 0x1949B1;
 #elif defined(_M_X64)
     uintptr_t no_logos_offset = 0x160DE1A;
-    uintptr_t no_press_start_offset = 0xFDB66;
+    // uintptr_t no_press_start_offset = 0xFDB66;
 #endif
 
     UINT skipIntro = GetPrivateProfileIntW(
@@ -275,18 +275,19 @@ void setup_qol_patches()
         patch_memory(address, &patch, 1);
     }
 
-    UINT skipPressStart = GetPrivateProfileIntW(
-        L"qol",
-        L"skipPressStart",
-        0,
-        L".\\ds2modengine.ini"
-    );
+    // NOTE this seems like it was causing me so crashes on creating a new character
+    // UINT skipPressStart = GetPrivateProfileIntW(
+    //     L"qol",
+    //     L"skipPressStart",
+    //     0,
+    //     L".\\ds2modengine.ini"
+    // );
 
-    if (skipPressStart == 1) {
-        uint8_t* address = (uint8_t*)(ds2_base_address + no_press_start_offset);
-        uint8_t patch = 0x2;
-        patch_memory(address, &patch, 1);
-    }
+    // if (skipPressStart == 1) {
+    //     uint8_t* address = (uint8_t*)(ds2_base_address + no_press_start_offset);
+    //     uint8_t patch = 0x2;
+    //     patch_memory(address, &patch, 1);
+    // }
 }
 
 void modengine_run()
