@@ -77,7 +77,6 @@ uintptr_t __fastcall ds2_detour_virtual_to_archive_path(uintptr_t p1, void*, DLS
 uintptr_t ds2_detour_virtual_to_archive_path(uintptr_t p1, DLString* path)
 #endif
 {
-    // ignore capacity above 7 to not have to deal with SSO bullshit
     if (path && path->length > 0 && path->string) {
         // NOTE: i have no idea which things i actually need to override
         // overriding gamedata:/ and title:/ seems to be enough for now
