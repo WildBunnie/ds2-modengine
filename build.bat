@@ -1,10 +1,10 @@
 @echo off
 
 if "%VSCMD_ARG_TGT_ARCH%"=="x64" (
-    set ARCH=64
+    set ARCH=x64
     set ASSEMBLER=ml64
 ) else if "%VSCMD_ARG_TGT_ARCH%"=="x86" (
-    set ARCH=32
+    set ARCH=x86
     set ASSEMBLER=ml
 ) else (
     echo MSVC environment not initialized
